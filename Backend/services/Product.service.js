@@ -1,24 +1,18 @@
-const productRepository = require('../repositories/Product.repository');
+const Product = require('../models/Product'); 
 
 class ProductService {
-    async createProduct(data) {
-        return await productRepository.create(data);
+    async addProduct(data) { 
+        return await Product.create(data); 
     }
-
-    async getProductById(id) {
-        return await productRepository.findById(id);
+    async getAllProducts() { 
+        return await Product.find(); 
     }
-
-    async getAllProducts() {
-        return await productRepository.findAll();
+    async updateProduct(id, data) { 
+        return await Product.findByIdAndUpdate(id, data, { new: true }); 
     }
-
-    async updateProduct(id, data) {
-        return await productRepository.update(id, data);
-    }
-
-    async deleteProduct(id) {
-        return await productRepository.delete(id);
+    async deleteProduct(id) { 
+        return await Product.findByIdAndDelete(id); 
     }
 }
+
 module.exports = new ProductService();
