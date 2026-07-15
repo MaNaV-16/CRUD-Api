@@ -73,6 +73,21 @@ class ProductController {
             res.status(500).json({ success: false, message: error.message });
         }
     }
+    async createProduct(req,res) {
+        try{
+            const { name, price, description } = req.body;
+            const image = req.file ? req.file.filename : null;
+
+            if(!name || !price) {
+                return res.status(400).json({ success: false, message: 'Name and price are required!' });
+            }
+            const product = await productService.addProduct({ name, price, description, image });
+            
+            res.status(201).json({ success: true, message: 'Product created successfully', data: product});
+        } catch (error) {
+            res.status(500).json ({ success: false, message: error.message});
+        }
+    }
 }
 
 module.exports = new ProductController();

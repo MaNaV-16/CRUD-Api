@@ -3,10 +3,13 @@ import axios from "axios";
 import "./App.css";
 
 const API_URL = "http://localhost:5000/api/products";
+const IMAGE_URL = "http://localhost:5000/uploads/";
+
 const App = () => {
     const [products, setProducts] = useState([]);
     const [formData, setFormData] = useState({ name: "", price: "", description: "" });
     const [editId, setEditId] = useState(null);
+    const [image, setImage] = useState(null);
 
     const fetchProducts = async () => {
         try {
@@ -16,6 +19,7 @@ const App = () => {
             console.error("Error fetching products", error);
         }
     };
+    
     useEffect(() => {
         fetchProducts();
     }, []);
@@ -24,17 +28,33 @@ const App = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleImageChange = (e) => {
+        setImage(e.target.files[0]);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const dataToSend = new FormData();
+        dataToSend.append('name', formData.name);
+        dataToSend.append('price', formData.price);
+        dataToSend.append('description', formData.description);
+        
+        if (image) {
+            dataToSend.append('image', image);
+        }
+        
         try {
             if (editId) {
-                await axios.put(`${API_URL}/${editId}`, formData);
+                await axios.put(`${API_URL}/${editId}`, dataToSend);
                 setEditId(null);
+            } else {
+                await axios.post(API_URL, dataToSend);
             }
-            else{
-                await axios.post(API_URL, formData);
-            }
+            
             setFormData({ name: "", price: "", description: "" });
+            setImage(null);
+            document.getElementById("imageInput").value = '';
+            
             fetchProducts();
             alert("Product submitted successfully!");
         } catch (error) {
@@ -70,6 +90,7 @@ const App = () => {
                     onChange={handleChange}
                     placeholder="Product Name"
                     className="input-field"
+                    required
                 />
                 <input
                     type="number"
@@ -78,6 +99,7 @@ const App = () => {
                     onChange={handleChange}
                     placeholder="Product Price"
                     className="input-field"
+                    required
                 />
                 <input
                     type="text"
@@ -87,13 +109,22 @@ const App = () => {
                     placeholder="Product Description"
                     className="input-field"
                 />
+                <input
+                    type="file"
+                    id="imageInput"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="input-field"
+                />
                 <button type="submit" className="btn-submit">
                     {editId ? "Update Product" : "Add Product"}
                 </button>
             </form>
+            
             <table className="product-table">
                 <thead>
                     <tr>
+                        <th>Image</th>
                         <th>Name</th>
                         <th>Price</th>
                         <th>Description</th>
@@ -103,11 +134,22 @@ const App = () => {
                 <tbody>
                     {products.map((product) => (
                         <tr key={product._id}>
+                            <td>
+                                {product.image ? (
+                                    <img 
+                                      src={`${IMAGE_URL}${product.image}`} 
+                                      alt={product.name} 
+                                      style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                    />
+                                ) : (
+                                    <span>No Image</span>
+                                )}
+                            </td>
                             <td>{product.name}</td>
                             <td>{product.price}</td>
                             <td>{product.description}</td>
                             <td>
-                                <button onClick={() => handleEdit(product)} className="btn-edit">
+                                <button onClick={() => handleEdit(product)} className="btn-edit" style={{marginRight: '10px'}}>
                                     Edit
                                 </button>
                                 <button onClick={() => handleDelete(product._id)} className="btn-delete">
@@ -123,6 +165,3 @@ const App = () => {
 };
 
 export default App;
-
-
-
