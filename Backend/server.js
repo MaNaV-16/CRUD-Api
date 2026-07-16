@@ -2,6 +2,9 @@ const app = require('./app');
 const mongoose = require('mongoose');
 const PORT = 5000;
 const DB_URL = 'mongodb://127.0.0.1:27017/crud_db';
+const authRoutes = require('./routes/authRoutes');
+
+app.use('/api/auth', authRoutes);
 
 mongoose.connect(DB_URL)
 .then(() => {
