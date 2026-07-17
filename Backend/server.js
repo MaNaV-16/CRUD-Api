@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const PORT = 5000;
 const DB_URL = 'mongodb://127.0.0.1:27017/crud_db';
 const authRoutes = require('./routes/authRoutes');
-
+const cors = require('cors');
+app.use(cors());
 app.use('/api/auth', authRoutes);
 
 mongoose.connect(DB_URL)

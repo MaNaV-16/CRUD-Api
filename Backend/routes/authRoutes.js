@@ -5,6 +5,10 @@ const sendEmail = require('../untils/sendEmail');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const verifyToken = require('../middlewares/authMiddleware');
+const { sendOtp, resetPassword } = require('../controllers/auth.controller');
+
+router.post('/send-otp', sendOtp);
+router.post('/reset-password', resetPassword);
 router.post('/register', async (req, res) => {
     try {
         const { name, email } = req.body;

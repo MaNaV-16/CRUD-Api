@@ -1,167 +1,22 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import "./App.css";
-
-const API_URL = "http://localhost:5000/api/products";
-const IMAGE_URL = "http://localhost:5000/uploads/";
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Login from './page/login';
+import Register from './page/register';
+import Products from './page/product';
+import ChangePassword from './page/changePassword';
 
 const App = () => {
-    const [products, setProducts] = useState([]);
-    const [formData, setFormData] = useState({ name: "", price: "", description: "" });
-    const [editId, setEditId] = useState(null);
-    const [image, setImage] = useState(null);
-
-    const fetchProducts = async () => {
-        try {
-            const response = await axios.get(API_URL);
-            setProducts(response.data.data);
-        } catch (error) {
-            console.error("Error fetching products", error);
-        }
-    };
-    
-    useEffect(() => {
-        fetchProducts();
-    }, []);
-
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleImageChange = (e) => {
-        setImage(e.target.files[0]);
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const dataToSend = new FormData();
-        dataToSend.append('name', formData.name);
-        dataToSend.append('price', formData.price);
-        dataToSend.append('description', formData.description);
-        
-        if (image) {
-            dataToSend.append('image', image);
-        }
-        
-        try {
-            if (editId) {
-                await axios.put(`${API_URL}/${editId}`, dataToSend);
-                setEditId(null);
-            } else {
-                await axios.post(API_URL, dataToSend);
-            }
-            
-            setFormData({ name: "", price: "", description: "" });
-            setImage(null);
-            document.getElementById("imageInput").value = '';
-            
-            fetchProducts();
-            alert("Product submitted successfully!");
-        } catch (error) {
-            console.error("Error submitting form", error);
-            const errorMessage = error.response?.data?.message || "An error occurred while submitting the form.";
-            alert(errorMessage);
-        }
-    };
-
-    const handleDelete = async (id) => {
-        try {
-            await axios.delete(`${API_URL}/${id}`);
-            fetchProducts();
-        } catch (error) {
-            console.error("Error deleting product", error);
-        }
-    };
-
-    const handleEdit = (product) => {
-        setEditId(product._id);
-        setFormData({ name: product.name, price: product.price, description: product.description });
-    };
 
     return (
-        <div className="container">
-            <h2>Product Management</h2>
-
-            <form onSubmit={handleSubmit} className="form-container">
-                <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="Product Name"
-                    className="input-field"
-                    required
-                />
-                <input
-                    type="number"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleChange}
-                    placeholder="Product Price"
-                    className="input-field"
-                    required
-                />
-                <input
-                    type="text"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    placeholder="Product Description"
-                    className="input-field"
-                />
-                <input
-                    type="file"
-                    id="imageInput"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="input-field"
-                />
-                <button type="submit" className="btn-submit">
-                    {editId ? "Update Product" : "Add Product"}
-                </button>
-            </form>
-            
-            <table className="product-table">
-                <thead>
-                    <tr>
-                        <th>Image</th>
-                        <th>Name</th>
-                        <th>Price</th>
-                        <th>Description</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {products.map((product) => (
-                        <tr key={product._id}>
-                            <td>
-                                {product.image ? (
-                                    <img 
-                                      src={`${IMAGE_URL}${product.image}`} 
-                                      alt={product.name} 
-                                      style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-                                    />
-                                ) : (
-                                    <span>No Image</span>
-                                )}
-                            </td>
-                            <td>{product.name}</td>
-                            <td>{product.price}</td>
-                            <td>{product.description}</td>
-                            <td>
-                                <button onClick={() => handleEdit(product)} className="btn-edit" style={{marginRight: '10px'}}>
-                                    Edit
-                                </button>
-                                <button onClick={() => handleDelete(product._id)} className="btn-delete">
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    )
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<Products />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/change-password" element={<ChangePassword />} />
+            </Routes>
+        </BrowserRouter>
+    );
 };
 
 export default App;
