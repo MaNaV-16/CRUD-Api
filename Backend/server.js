@@ -6,6 +6,11 @@ const authRoutes = require('./routes/authRoutes');
 const cors = require('cors');
 app.use(cors());
 app.use('/api/auth', authRoutes);
+require('dotenv').config();
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger-output.json');
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 mongoose.connect(DB_URL)
 .then(() => {

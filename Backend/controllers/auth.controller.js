@@ -10,21 +10,23 @@ const sendOtp = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: "User not found!" });
         }
+        
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
     
         user.otp = otp; 
         await user.save();
+
         const transporter = nodemailer.createTransport({
-            host: 'smtp.ethereal.email',
+            host: 'smtp.gmail.com',
             port: 587,
             auth: {
-                user: 'franco.graham@ethereal.email',
-                pass: 'jxEYjXrVvETEnkQ6cG' 
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASSWORD
             }
         });
 
         await transporter.sendMail({
-            from: '"CRUD API" <admin@crud.com>',
+            from: `"CRUD API" <${process.env.EMAIL_USER}>`,
             to: email,
             subject: "Password Reset OTP",
             text: `Your OTP for password reset is: ${otp}`
@@ -41,11 +43,14 @@ const resetPassword = async (req, res) => {
     try {
         const { email, otp, newPassword } = req.body;
         const user = await User.findOne({ email });
+        
         if (!user || user.otp !== otp) {
             return res.status(400).json({ message: "Invalid OTP or Email!" });
         }
+        
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
+        
         user.password = hashedPassword;
         user.otp = null; 
         await user.save();
